@@ -135,13 +135,14 @@ class CrudController extends Controller
         if (is_countable($columns)) {
             $fields     = $this->crud->fields();
             foreach ($fields as $key => $field) {
-                $comment = null;
-                foreach ($columns as $column) {
-                    if($column->Field === $field['name']){
-                        if ($comment = $column->Comment ? trim($column->Comment) : null) {
-                            $this->crud->modifyField($field['name'], ['hint' => $comment]);
+                if (!isset($field['hint']) && isset($field['name'])) {
+                    foreach ($columns as $column) {
+                        if($column->Field === $field['name']){
+                            if ($comment = $column->Comment ? trim($column->Comment) : null) {
+                                $this->crud->modifyField($field['name'], ['hint' => $comment]);
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
             }
