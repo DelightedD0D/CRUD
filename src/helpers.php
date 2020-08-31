@@ -210,3 +210,17 @@ if (! function_exists('is_countable')) {
         return is_array($obj) || $obj instanceof Countable;
     }
 }
+
+if (! function_exists('backpack_get_column_info')) {
+    /**
+     * Get an array of info for the columns of the given connection and table
+     *
+     * @param string $connection The name of the DB connection
+     * @param string $table      The name of the DB table
+     * @return array
+     */
+    function backpack_get_column_info($connection, $table)
+    {
+        return DB::connection($connection)->select(DB::raw('SHOW FULL COLUMNS FROM '.$table.';'));
+    }
+}

@@ -2,6 +2,7 @@
 
 namespace Backpack\CRUD\app\Http\Controllers;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
@@ -114,6 +115,36 @@ class CrudController extends Controller
          */
         if (method_exists($this, $setupClassName)) {
             $this->{$setupClassName}();
+        }
+    }
+
+    /**
+     * For each field currently configured, set the 'hint' value pulling the
+     * value from the "comment" for the column in the database if it exists
+     *
+     * NOTE: This method should be called once after adding all field configurations
+     */
+    public function setFieldHintsFromColumnComments()
+    {
+        /** @var Model $instance */
+        $model      = $this->crud->getModel();
+        $instance   = new $model;
+        $table      = $instance->getTable();
+        $connection = $instance->getConnectionName();
+        $columns    = backpack_get_column_info($connection, $table);
+        if (is_countable($columns)) {
+            $fields     = $this->crud->fields();
+            foreach ($fields as $key => $field) {
+                $comment = null;
+                foreach ($columns as $column) {
+                    if($column->Field === $field['name']){
+                        if ($comment = $column->Comment ? trim($column->Comment) : null) {
+                            $this->crud->modifyField($field['name'], ['hint' => $comment]);
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }
